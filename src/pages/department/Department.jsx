@@ -9,7 +9,7 @@ const getImageUrl = (icon) => {
   if (!icon) return null;
   if (/^https?:\/\//i.test(icon)) return icon;
   // If icon already starts with /uploads/, use it as-is
-  if (icon.startsWith('/uploads/')) {
+  if (icon.startsWith("/uploads/")) {
     return `https://hire-me-jobs.onrender.com${icon}`;
   }
   // Otherwise, assume it's just a filename
@@ -24,7 +24,13 @@ function DeptIcon({ icon, name }) {
   if (!src || errored) {
     return (
       <div className="w-9 h-9 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <svg
+          className="w-4 h-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={2}
+          viewBox="0 0 24 24"
+        >
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -87,7 +93,7 @@ export default function Department() {
 
   const handleToggleStatus = async (id, currentStatus) => {
     setDepartments((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, status: !currentStatus } : d))
+      prev.map((d) => (d.id === id ? { ...d, status: !currentStatus } : d)),
     );
     try {
       await fetch(`${API_BASE}/${id}`, {
@@ -98,14 +104,16 @@ export default function Department() {
     } catch (err) {
       console.error("Status toggle failed:", err);
       setDepartments((prev) =>
-        prev.map((d) => (d.id === id ? { ...d, status: currentStatus } : d))
+        prev.map((d) => (d.id === id ? { ...d, status: currentStatus } : d)),
       );
     }
   };
 
   const handleToggleTrending = async (id, currentTrending) => {
     setDepartments((prev) =>
-      prev.map((d) => (d.id === id ? { ...d, is_trending: !currentTrending } : d))
+      prev.map((d) =>
+        d.id === id ? { ...d, is_trending: !currentTrending } : d,
+      ),
     );
     try {
       await fetch(`${API_BASE}/${id}`, {
@@ -116,7 +124,9 @@ export default function Department() {
     } catch (err) {
       console.error("Trending toggle failed:", err);
       setDepartments((prev) =>
-        prev.map((d) => (d.id === id ? { ...d, is_trending: currentTrending } : d))
+        prev.map((d) =>
+          d.id === id ? { ...d, is_trending: currentTrending } : d,
+        ),
       );
     }
   };
@@ -127,7 +137,7 @@ export default function Department() {
       active: departments.filter((d) => d.status).length,
       inactive: departments.filter((d) => !d.status).length,
     }),
-    [departments]
+    [departments],
   );
 
   const filtered = useMemo(() => {
@@ -136,7 +146,7 @@ export default function Department() {
     if (activeTab === "inactive") list = list.filter((d) => !d.status);
     if (search.trim()) {
       list = list.filter((d) =>
-        d.department_name?.toLowerCase().includes(search.toLowerCase())
+        d.department_name?.toLowerCase().includes(search.toLowerCase()),
       );
     }
     return list;
@@ -212,35 +222,32 @@ export default function Department() {
               </div>
 
               {/* Tabs - right side of search input */}
-              <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-                      activeTab === tab.key
-                        ? "bg-white text-indigo-600 shadow-sm"
-                        : "text-gray-500 hover:text-gray-700"
-                    }`}
-                  >
-                    {tab.label}
-                    <span
-                      className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
-                        activeTab === tab.key
-                          ? "bg-indigo-50 text-indigo-600"
-                          : "bg-gray-200 text-gray-500"
-                      }`}
-                    >
-                      {counts[tab.key]}
-                    </span>
-                  </button>
-                ))}
-              </div>
             </div>
 
-            <span className="text-sm text-gray-500">
-              {filtered.length} record{filtered.length !== 1 ? "s" : ""}
-            </span>
+            <div className="flex items-center gap-1 bg-gray-100 p-1 rounded-lg">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                    activeTab === tab.key
+                      ? "bg-white text-indigo-600 shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {tab.label}
+                  <span
+                    className={`ml-1.5 text-xs px-1.5 py-0.5 rounded-full ${
+                      activeTab === tab.key
+                        ? "bg-indigo-50 text-indigo-600"
+                        : "bg-gray-200 text-gray-500"
+                    }`}
+                  >
+                    {counts[tab.key]}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Table */}
@@ -330,11 +337,12 @@ export default function Department() {
                       key={dept.id}
                       className="hover:bg-gray-50 transition-colors"
                     >
-                      <td className="px-5 py-3.5 text-gray-500">
-                        {index + 1}
-                      </td>
+                      <td className="px-5 py-3.5 text-gray-500">{index + 1}</td>
                       <td className="px-5 py-3.5">
-                        <DeptIcon icon={dept.icon} name={dept.department_name} />
+                        <DeptIcon
+                          icon={dept.icon}
+                          name={dept.department_name}
+                        />
                       </td>
                       <td className="px-5 py-3.5">
                         <span className="font-medium text-gray-800">
@@ -353,7 +361,9 @@ export default function Department() {
                         >
                           <span
                             className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
-                              dept.is_trending ? "translate-x-4" : "translate-x-1"
+                              dept.is_trending
+                                ? "translate-x-4"
+                                : "translate-x-1"
                             }`}
                           />
                         </button>
@@ -377,17 +387,22 @@ export default function Department() {
                       </td>
                       <td className="px-5 py-3.5 text-gray-500">
                         {dept.created_at
-                          ? new Date(dept.created_at).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                            })
+                          ? new Date(dept.created_at).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              },
+                            )
                           : "—"}
                       </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1">
                           <button
-                            onClick={() => setViewModal({ open: true, data: dept })}
+                            onClick={() =>
+                              setViewModal({ open: true, data: dept })
+                            }
                             className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="View"
                           >
@@ -489,14 +504,27 @@ export default function Department() {
                 onClick={() => setViewModal({ open: false, data: null })}
                 className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
 
             <div className="flex flex-col items-center text-center">
-              <DeptIcon icon={viewModal.data.icon} name={viewModal.data.department_name} />
+              <DeptIcon
+                icon={viewModal.data.icon}
+                name={viewModal.data.department_name}
+              />
               <h4 className="mt-3 text-sm font-semibold text-gray-800">
                 {viewModal.data.department_name}
               </h4>
@@ -519,7 +547,11 @@ export default function Department() {
 
                 {viewModal.data.is_trending && (
                   <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 text-xs font-medium px-2 py-1 rounded-full">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                    <svg
+                      className="w-3 h-3"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
                       <path
                         fillRule="evenodd"
                         d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z"
