@@ -35,6 +35,10 @@ import Skills from "./pages/skills/Skills";
 import EditSkils from "./pages/skills/EditSkills";
 import AddSkills from "./pages/skills/AddSkills";
 
+import NoticePeriods from "./pages/noticeperiods/Noticeperiods";
+import EditNoticePeriods from "./pages/noticeperiods/Editnoticeperiods";
+import AddNoticePeriods from "./pages/noticeperiods/Addnoticeperiods";
+
 function App() {
   return (
     <AuthProvider>
@@ -67,15 +71,20 @@ function App() {
             <Route path="/department/add" element={<AddDepartment />} />
             <Route path="/department/edit/:id" element={<EditDepartment />} />
 
-             <Route path="/languages" element={<Languages />} />
+            <Route path="/languages" element={<Languages />} />
             <Route path="/languages/add" element={<AddLanguages />} />
             <Route path="/languages/edit/:id" element={<EditLanguages />} />
-            
+
             <Route path="/skills" element={<Skills />} />
             <Route path="/skills/add" element={<AddSkills />} />
             <Route path="/skills/edit/:id" element={<EditSkils />} />
-            
-              
+
+            <Route path="/noticeperiods" element={<NoticePeriods />} />
+            <Route path="/noticeperiods/add" element={<AddNoticePeriods />} />
+            <Route
+              path="/noticeperiods/edit/:id"
+              element={<EditNoticePeriods />}
+            />
 
             {/* <Route path="jobs" element={<Jobs />} />
             <Route path="applications" element={<Applications />} />
