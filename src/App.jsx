@@ -31,6 +31,9 @@ import Languages from "./pages/Languages/Languages";
 import EditLanguages from "./pages/Languages/EditLanguages";
 import AddLanguages from "./pages/Languages/AddLanguages";
 
+import Skills from "./pages/skills/Skills";
+import EditSkils from "./pages/skills/EditSkills";
+import AddSkills from "./pages/skills/AddSkills";
 
 function App() {
   return (
@@ -67,7 +70,11 @@ function App() {
              <Route path="/languages" element={<Languages />} />
             <Route path="/languages/add" element={<AddLanguages />} />
             <Route path="/languages/edit/:id" element={<EditLanguages />} />
-
+            
+            <Route path="/skills" element={<Skills />} />
+            <Route path="/skills/add" element={<AddSkills />} />
+            <Route path="/skills/edit/:id" element={<EditSkils />} />
+            
               
 
             {/* <Route path="jobs" element={<Jobs />} />

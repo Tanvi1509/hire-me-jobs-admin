@@ -1,0 +1,518 @@
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+const API_URL = "https://hire-me-jobs.onrender.com/skills";
+const PAGE_SIZE = 5;
+
+// Avatar background colors, cycled per row
+const AVATAR_COLORS = [
+  "bg-orange-500",
+  "bg-pink-600",
+  "bg-emerald-600",
+  "bg-indigo-600",
+  "bg-sky-600",
+  "bg-purple-600",
+];
+
+const formatDate = (value) => {
+  if (!value) return "-";
+  return new Date(value).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const Skills = () => {
+  const navigate = useNavigate();
+
+  const [skills, setSkills] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [search, setSearch] = useState("");
+  const [activeTab, setActiveTab] = useState("all"); // all | active | inactive
+  const [viewItem, setViewItem] = useState(null);
+  const [deleteId, setDeleteId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const fetchSkills = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const res = await fetch(API_URL);
+      const data = await res.json();
+      if (data?.success) {
+        setSkills(data.data || []);
+      } else {
+        setError(data?.message || "Failed to fetch skills");
+      }
+    } catch (err) {
+      setError("Something went wrong while fetching skills");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSkills();
+  }, []);
+
+  const handleDelete = async (id) => {
+    try {
+      setDeleting(true);
+      const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok) {
+        setSkills((prev) => prev.filter((item) => item.id !== id));
+        setDeleteId(null);
+      } else {
+        alert(data?.message || "Failed to delete skill");
+      }
+    } catch (err) {
+      alert("Something went wrong while deleting skill");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const filteredSkills = useMemo(() => {
+    return skills
+      .filter((item) => {
+        if (activeTab === "active") return item.status === true;
+        if (activeTab === "inactive") return item.status === false;
+        return true;
+      })
+      .filter((item) =>
+        (item.skill_name || "").toLowerCase().includes(search.toLowerCase())
+      );
+  }, [skills, activeTab, search]);
+
+  // Reset to page 1 whenever the filtered result set changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeTab]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredSkills.length / PAGE_SIZE));
+  const paginatedSkills = filteredSkills.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
+
+  const tabs = [
+    { key: "all", label: "All" },
+    { key: "active", label: "Active" },
+    { key: "inactive", label: "Inactive" },
+  ];
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
+
+  return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      {/* Breadcrumb */}
+      <p className="text-sm text-gray-400 mb-4">
+        Dashboard <span className="mx-1">/</span>
+        <span className="text-gray-700 font-medium">Skills</span>
+      </p>
+
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M6.28 5.22a.75.75 0 010 1.06L2.56 10l3.72 3.72a.75.75 0 01-1.06 1.06L.97 10.53a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0zm7.44 0a.75.75 0 011.06 0l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06-1.06L17.44 10l-3.72-3.72a.75.75 0 010-1.06zM11.377 2.011a.75.75 0 01.612.867l-2.5 14.5a.75.75 0 01-1.478-.255l2.5-14.5a.75.75 0 01.866-.612z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Skills</h1>
+            <p className="text-sm text-gray-500 mt-0.5">
+              Manage all the skills used across the platform
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={() => navigate("/skills/add")}
+          className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-lg shadow-sm transition-colors"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+          </svg>
+          Add Skill
+        </button>
+      </div>
+
+      {/* Card */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Toolbar */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4">
+          {/* Title + count */}
+          <div className="flex items-center gap-2">
+            <h2 className="text-base font-bold text-gray-900">Skill List</h2>
+            <span className="inline-flex items-center justify-center min-w-[1.6rem] h-6 px-2 rounded-full bg-blue-50 text-blue-600 text-xs font-semibold">
+              {filteredSkills.length}
+            </span>
+          </div>
+
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Search */}
+            <div className="relative w-full sm:w-56">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search skill..."
+                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Tabs: All / Active / Inactive */}
+            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-4 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                    activeTab === tab.key
+                      ? "bg-white text-gray-900 font-semibold shadow-sm"
+                      : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Refresh */}
+            <button
+              onClick={fetchSkills}
+              className="inline-flex items-center gap-2 border border-gray-200 text-gray-600 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M15.312 11.424a5.5 5.5 0 01-9.201 2.466l-.312-.311h2.433a.75.75 0 000-1.5H3.989a.75.75 0 00-.75.75v4.242a.75.75 0 001.5 0v-2.43l.31.31a7 7 0 0011.712-3.138.75.75 0 00-1.449-.39zm1.23-3.723a.75.75 0 00.219-.53V2.929a.75.75 0 00-1.5 0V5.36l-.31-.31A7 7 0 003.239 8.188a.75.75 0 101.448.389A5.5 5.5 0 0113.89 6.11l.311.31h-2.432a.75.75 0 000 1.5h4.243a.75.75 0 00.53-.219z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        {/* Table */}
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-left bg-gray-50/80 border-y border-gray-100">
+                <th className="px-5 py-3 font-semibold text-gray-400 text-xs uppercase tracking-wide">#</th>
+                <th className="px-5 py-3 font-semibold text-gray-400 text-xs uppercase tracking-wide">Skill</th>
+                <th className="px-5 py-3 font-semibold text-gray-400 text-xs uppercase tracking-wide">Status</th>
+                <th className="px-5 py-3 font-semibold text-gray-400 text-xs uppercase tracking-wide">Created</th>
+                <th className="px-5 py-3 font-semibold text-gray-400 text-xs uppercase tracking-wide">Last Updated</th>
+                <th className="px-5 py-3 font-semibold text-gray-400 text-xs uppercase tracking-wide text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="6" className="px-5 py-10 text-center text-gray-400">
+                    Loading skills...
+                  </td>
+                </tr>
+              ) : error ? (
+                <tr>
+                  <td colSpan="6" className="px-5 py-10 text-center text-red-500">
+                    {error}
+                  </td>
+                </tr>
+              ) : paginatedSkills.length === 0 ? (
+                <tr>
+                  <td colSpan="6" className="px-5 py-10 text-center text-gray-400">
+                    No skills found
+                  </td>
+                </tr>
+              ) : (
+                paginatedSkills.map((item, index) => (
+                  <tr
+                    key={item.id}
+                    className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors"
+                  >
+                    <td className="px-5 py-4">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-gray-100 text-gray-500 text-xs font-semibold">
+                        {(currentPage - 1) * PAGE_SIZE + index + 1}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-9 h-9 rounded-lg flex items-center justify-center text-white text-sm font-semibold shrink-0 ${
+                            AVATAR_COLORS[item.id % AVATAR_COLORS.length]
+                          }`}
+                        >
+                          {(item.skill_name || "?").charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="text-gray-900 font-semibold leading-tight">
+                            {item.skill_name}
+                          </p>
+                          <p className="text-xs text-gray-400 leading-tight">ID: #{item.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
+                          item.status
+                            ? "bg-green-50 text-green-600"
+                            : "bg-amber-50 text-amber-600"
+                        }`}
+                      >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            item.status ? "bg-green-500" : "bg-amber-500"
+                          }`}
+                        />
+                        {item.status ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-gray-500">{formatDate(item.created_at)}</td>
+                    <td className="px-5 py-4 text-gray-500">{formatDate(item.updated_at)}</td>
+                    <td className="px-5 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        {/* View */}
+                        <button
+                          onClick={() => setViewItem(item)}
+                          title="View"
+                          className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                            <path
+                              fillRule="evenodd"
+                              d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                        {/* Edit */}
+                        <button
+                          onClick={() => navigate(`/skills/edit/${item.id}`)}
+                          title="Edit"
+                          className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-green-50 text-green-600 hover:bg-green-100 transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
+                            <path
+                              fillRule="evenodd"
+                              d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                        {/* Delete */}
+                        <button
+                          onClick={() => setDeleteId(item.id)}
+                          title="Delete"
+                          className="w-8 h-8 inline-flex items-center justify-center rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                              fillRule="evenodd"
+                              d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 112 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 112 0v6a1 1 0 11-2 0V8z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        {!loading && !error && filteredSkills.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-t border-gray-100">
+            <p className="text-xs text-gray-400">
+              Showing{" "}
+              <span className="font-medium text-gray-600">
+                {(currentPage - 1) * PAGE_SIZE + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-medium text-gray-600">
+                {Math.min(currentPage * PAGE_SIZE, filteredSkills.length)}
+              </span>{" "}
+              of <span className="font-medium text-gray-600">{filteredSkills.length}</span> skills
+            </p>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => goToPage(page)}
+                  className={`w-8 h-8 inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                    page === currentPage
+                      ? "bg-blue-600 text-white"
+                      : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* View Modal */}
+      {viewItem && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-md p-6 relative">
+            <button
+              onClick={() => setViewItem(null)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+
+            <div className="flex items-center gap-3 mb-5">
+              <div
+                className={`w-11 h-11 rounded-lg flex items-center justify-center text-white text-base font-semibold ${
+                  AVATAR_COLORS[viewItem.id % AVATAR_COLORS.length]
+                }`}
+              >
+                {(viewItem.skill_name || "?").charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 leading-tight">
+                  {viewItem.skill_name}
+                </h2>
+                <p className="text-xs text-gray-400">ID: #{viewItem.id}</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Trending</span>
+                <span className="text-gray-800 font-medium">
+                  {viewItem.is_trending ? "Yes" : "No"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Status</span>
+                <span
+                  className={`font-medium ${
+                    viewItem.status ? "text-green-600" : "text-amber-600"
+                  }`}
+                >
+                  {viewItem.status ? "Active" : "Inactive"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Created</span>
+                <span className="text-gray-800 font-medium">{formatDate(viewItem.created_at)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Last Updated</span>
+                <span className="text-gray-800 font-medium">{formatDate(viewItem.updated_at)}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 mt-6">
+              <button
+                onClick={() => {
+                  setViewItem(null);
+                  navigate(`/skills/edit/${viewItem.id}`);
+                }}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-green-50 text-green-600 hover:bg-green-100"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => {
+                  setDeleteId(viewItem.id);
+                  setViewItem(null);
+                }}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-red-50 text-red-600 hover:bg-red-100"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirm Modal */}
+      {deleteId && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-lg w-full max-w-sm p-6">
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">Delete Skill</h2>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to delete this skill? This action cannot be undone.
+            </p>
+            <div className="flex items-center justify-end gap-2">
+              <button
+                onClick={() => setDeleteId(null)}
+                className="px-4 py-2 text-sm font-medium rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDelete(deleteId)}
+                disabled={deleting}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Skills;
