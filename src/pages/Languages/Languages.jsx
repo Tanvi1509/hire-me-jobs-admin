@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const API_URL = "https://hire-me-jobs.onrender.com/language";
+const PAGE_SIZE = 5;
 
 // Avatar background colors, cycled per row (matches the varied colored
 // initials seen on the Roles page: orange, pink, green, etc.)
@@ -34,6 +35,7 @@ const Languages = () => {
   const [viewItem, setViewItem] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const fetchLanguages = async () => {
     try {
@@ -75,21 +77,39 @@ const Languages = () => {
     }
   };
 
-  const filteredLanguages = languages
-    .filter((item) => {
-      if (activeTab === "active") return item.status === true;
-      if (activeTab === "inactive") return item.status === false;
-      return true;
-    })
-    .filter((item) =>
-      (item.language_name || "").toLowerCase().includes(search.toLowerCase())
-    );
+  const filteredLanguages = useMemo(() => {
+    return languages
+      .filter((item) => {
+        if (activeTab === "active") return item.status === true;
+        if (activeTab === "inactive") return item.status === false;
+        return true;
+      })
+      .filter((item) =>
+        (item.language_name || "").toLowerCase().includes(search.toLowerCase())
+      );
+  }, [languages, activeTab, search]);
+
+  // Reset to page 1 whenever the filtered result set changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeTab]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredLanguages.length / PAGE_SIZE));
+  const paginatedLanguages = filteredLanguages.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
   const tabs = [
     { key: "all", label: "All" },
     { key: "active", label: "Active" },
     { key: "inactive", label: "Inactive" },
   ];
+
+  const goToPage = (page) => {
+    if (page < 1 || page > totalPages) return;
+    setCurrentPage(page);
+  };
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -229,14 +249,14 @@ const Languages = () => {
                   </td>
                 </tr>
               ) : (
-                filteredLanguages.map((item, index) => (
+                paginatedLanguages.map((item, index) => (
                   <tr
                     key={item.id}
                     className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors"
                   >
                     <td className="px-5 py-4">
                       <span className="inline-flex items-center justify-center w-7 h-7 rounded-md bg-gray-100 text-gray-500 text-xs font-semibold">
-                        {index + 1}
+                        {(currentPage - 1) * PAGE_SIZE + index + 1}
                       </span>
                     </td>
                     <td className="px-5 py-4">
@@ -328,6 +348,59 @@ const Languages = () => {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {!loading && !error && filteredLanguages.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-5 py-4 border-t border-gray-100">
+            <p className="text-xs text-gray-400">
+              Showing{" "}
+              <span className="font-medium text-gray-600">
+                {(currentPage - 1) * PAGE_SIZE + 1}
+              </span>{" "}
+              to{" "}
+              <span className="font-medium text-gray-600">
+                {Math.min(currentPage * PAGE_SIZE, filteredLanguages.length)}
+              </span>{" "}
+              of <span className="font-medium text-gray-600">{filteredLanguages.length}</span> languages
+            </p>
+
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => goToPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => goToPage(page)}
+                  className={`w-8 h-8 inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
+                    page === currentPage
+                      ? "bg-blue-600 text-white"
+                      : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+              <button
+                onClick={() => goToPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="w-8 h-8 inline-flex items-center justify-center rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* View Modal */}
