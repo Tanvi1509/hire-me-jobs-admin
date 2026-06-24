@@ -27,6 +27,9 @@ import Department from "./pages/department/Department";
 import EditDepartment from "./pages/department/EditDepartment";
 import AddDepartment from "./pages/department/AddDepartment";
 
+import Languages from "./pages/Languages/Languages";
+import EditLanguages from "./pages/Languages/EditLanguages";
+import AddLanguages from "./pages/Languages/AddLanguages";
 
 
 function App() {
@@ -60,6 +63,12 @@ function App() {
             <Route path="/department" element={<Department />} />
             <Route path="/department/add" element={<AddDepartment />} />
             <Route path="/department/edit/:id" element={<EditDepartment />} />
+
+             <Route path="/languages" element={<Languages />} />
+            <Route path="/languages/add" element={<AddLanguages />} />
+            <Route path="/languages/edit/:id" element={<EditLanguages />} />
+
+              
 
             {/* <Route path="jobs" element={<Jobs />} />
             <Route path="applications" element={<Applications />} />

@@ -162,6 +162,12 @@ export default function Department() {
     <div className="min-h-screen bg-gray-100">
       {/* Page Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4">
+        {/* Breadcrumb */}
+        <nav className="flex items-center gap-1.5 text-[12px] font-medium text-gray-400 mb-5">
+          <span>Dashboard</span>
+          <span className="text-gray-300">/</span>
+          <span className="text-gray-700 font-semibold">Department</span>
+        </nav>
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-xl font-semibold text-gray-800">Departments</h1>

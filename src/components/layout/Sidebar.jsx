@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Briefcase, FileText, Building2,
   Users, Settings, LogOut, ChevronLeft, X,
-  BarChart3, Bell, ShieldCheck,UserCog, Layers3,
+  BarChart3, Bell, ShieldCheck,UserCog, Layers3, Languages, Brain,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -12,6 +12,9 @@ const navItems = [
   { to: '/roles', icon: UserCog, label: 'Roles' },
   { to: '/modules', icon: Layers3, label: 'Modules' },
   { to: '/department', icon: Building2, label: 'Department' },
+  { to: '/languages', icon: Languages, label: 'Languages' },
+   { to: '/skills', icon: Brain, label: 'Skills' }, 
+
 
 
   // { to: '/jobs', icon: Briefcase, label: 'Job Listings' },
