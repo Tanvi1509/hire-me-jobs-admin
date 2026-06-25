@@ -43,6 +43,19 @@ import ExperienceLevels from "./pages/experiencelevels/ExperienceLevels";
 import AddExperienceLevels from "./pages/experiencelevels/AddExperienceLevels";
 import EditExperienceLevels from "./pages/experiencelevels/EditExperienceLevels";
 
+import AddWorkplaceTypes from "./pages/workplacetypes/AddWorkplaceTypes";
+import EditWorkplaceTypes from "./pages/workplacetypes/EditWorkplaceTypes";
+import WorkplaceTypes from "./pages/workplacetypes/WorkplaceTypes";
+
+import State from "./pages/state/State";
+import AddState from "./pages/state/AddState";
+import EditState from "./pages/state/EditState";
+
+
+import City from "./pages/city/City";
+import AddCity from "./pages/city/AddCity";
+import EditCity from "./pages/city/EditCity";
+
 function App() {
   return (
     <AuthProvider>
@@ -99,6 +112,24 @@ function App() {
               path="/experience-levels/edit/:id"
               element={<EditExperienceLevels />}
             />
+
+            <Route path="/workplace-types" element={<WorkplaceTypes />} />
+            <Route
+              path="/workplace-types/add"
+              element={<AddWorkplaceTypes />}
+            />
+            <Route
+              path="/workplace-types/edit/:id"
+              element={<EditWorkplaceTypes />}
+            />
+
+            <Route path="/state" element={<State />} />
+            <Route path="/state/add" element={<AddState />} />
+            <Route path="/state/edit/:id" element={<EditState />} />
+
+            <Route path="/city" element={<City />} />
+            <Route path="/city/add" element={<AddCity />} />
+            <Route path="/city/edit/:id" element={<EditCity />} />
 
             {/* <Route path="jobs" element={<Jobs />} />
             <Route path="applications" element={<Applications />} />

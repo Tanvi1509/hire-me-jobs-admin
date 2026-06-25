@@ -18,6 +18,8 @@ import {
   Brain,
   CalendarClock,
   TrendingUp,
+  MapPin,
+  Building,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -31,6 +33,9 @@ const navItems = [
   { to: "/skills", icon: Brain, label: "Skills" },
   { to: "/noticeperiods", icon: CalendarClock, label: "Notice Period" },
   { to: "/experience-levels", icon: TrendingUp, label: "Experience Levels" },
+  { to: "/workplace-types", icon: Building2, label: "Workplace Types" },
+  { to: "/state", icon: MapPin, label: "State" },
+  { to: "/city", icon: Building, label: "City" },
 
   // { to: '/jobs', icon: Briefcase, label: 'Job Listings' },
   // { to: '/applications', icon: FileText, label: 'Applications' },
