@@ -39,6 +39,10 @@ import NoticePeriods from "./pages/noticeperiods/Noticeperiods";
 import EditNoticePeriods from "./pages/noticeperiods/Editnoticeperiods";
 import AddNoticePeriods from "./pages/noticeperiods/Addnoticeperiods";
 
+import ExperienceLevels from "./pages/experiencelevels/ExperienceLevels";
+import AddExperienceLevels from "./pages/experiencelevels/AddExperienceLevels";
+import EditExperienceLevels from "./pages/experiencelevels/EditExperienceLevels";
+
 function App() {
   return (
     <AuthProvider>
@@ -84,6 +88,16 @@ function App() {
             <Route
               path="/noticeperiods/edit/:id"
               element={<EditNoticePeriods />}
+            />
+
+            <Route path="/experience-levels" element={<ExperienceLevels />} />
+            <Route
+              path="/experience-levels/add"
+              element={<AddExperienceLevels />}
+            />
+            <Route
+              path="/experience-levels/edit/:id"
+              element={<EditExperienceLevels />}
             />
 
             {/* <Route path="jobs" element={<Jobs />} />
