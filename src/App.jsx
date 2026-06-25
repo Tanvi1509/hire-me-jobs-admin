@@ -37,7 +37,7 @@ import AddSkills from "./pages/skills/AddSkills";
 
 import NoticePeriods from "./pages/noticeperiods/NoticePeriods";
 import EditNoticePeriods from "./pages/noticeperiods/EditNoticePeriods";
-import AddNoticePeriods from "./pages/noticeperiods/Addnoticeperiods";
+import AddNoticePeriods from "./pages/noticeperiods/AddNoticePeriods";
 
 import ExperienceLevels from "./pages/experiencelevels/ExperienceLevels";
 import AddExperienceLevels from "./pages/experiencelevels/AddExperienceLevels";
